@@ -1,10 +1,11 @@
-/* LECCIÓN 1
+/* LECCIÓN 2
 Clase tarea */
 class Tarea {
-  constructor(id, descripcion, estado, fechaCreacion) {
+  constructor(id, descripcion) {
     this.id = id;
     this.descripcion = descripcion;
-    this.estado = estado;
+    this.estado = false; // false = pendiente, true = completada
+    const fechaCreacion = new Date(); // const porque no se reasigna.
     this.fechaCreacion = fechaCreacion;
   }
 
@@ -16,26 +17,28 @@ class Tarea {
 
 // Clase GestorTareas
 class GestorTareas {
-  #tareas = []; // privada
+  #tareas = []; // Array privado
 
   // Crear tareas
-  agregarTarea(tarea) {
+  agregarTarea(descripcion) {
+    const id = this.#tareas.length + 1; // Generar ID.
+    const tarea = new Tarea(id, descripcion);
     this.#tareas.push(tarea);
   }
 
   //Eliminar tareas por id
   eliminarTarea(id) {
-    const index = this.#tareas.findIndex((tarea) => tarea.id === id);
+    const index = this.#tareas.findIndex((tarea) => tarea.id === id); // const porque se calcula una sola vez.
     if (index === -1) {
-      console.log("Tarea noencontrada");
+      console.log("Tarea no encontrada");
       return;
     }
     this.#tareas.splice(index, 1);
   }
 
-  // Camciar estado por id
+  // Cambiar estado por id
   cambiarEstado(id) {
-    const tarea = this.#tareas.find((tarea) => tarea.id === id);
+    let tarea = this.#tareas.find((tarea) => tarea.id === id); //let porque puede ser undefined.
     if (!tarea) {
       console.log("Tarea no encontrada");
       return;
@@ -43,9 +46,9 @@ class GestorTareas {
     tarea.cambiarEstado();
   }
 
-  // Listar tareas para verlas sin romper encapsulamiento
   listarTareas() {
     return this.#tareas;
+    // Listar tareas para verlas sin romper encapsulamiento
   }
 }
 
@@ -53,24 +56,14 @@ class GestorTareas {
 // TESTEO DEL CÓDIGO
 // ------------------
 
-// Crear instancia del gestor
-const gestor = new GestorTareas();
+// INTANCIA del gestor
+const gestor = new GestorTareas(); //const porque siempre seá el mismo objeto.
 
-// Agregar tareas
-gestor.agregarTarea(
-  new Tarea(1, "Estudiar POO", false, new Date().toLocaleString()),
-);
-gestor.agregarTarea(
-  new Tarea(2, "Preparar proyecto", true, new Date().toLocaleString()),
-);
+gestor.agregarTarea("Estudiar JavaScript");
+gestor.agregarTarea("Hacer ejercicio");
 
-// Listar tareas
 console.log("Lista inicial:", gestor.listarTareas());
-
-// Cambiar estado de la tarea 1
 gestor.cambiarEstado(1);
 console.log("Después de cambiar estado:", gestor.listarTareas());
-
-// Eliminar tarea 2
 gestor.eliminarTarea(2);
 console.log("Después de eliminar tarea 2:", gestor.listarTareas());
