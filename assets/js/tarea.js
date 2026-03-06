@@ -51,19 +51,25 @@ class GestorTareas {
     // Listar tareas para verlas sin romper encapsulamiento
   }
 }
-
 // ------------------
 // TESTEO DEL CÓDIGO
 // ------------------
 
 // INTANCIA del gestor
-const gestor = new GestorTareas(); //const porque siempre seá el mismo objeto.
+const gestor = new GestorTareas(); //const porque siempre será el mismo objeto.
 
 gestor.agregarTarea("Estudiar JavaScript");
-gestor.agregarTarea("Hacer ejercicio");
+gestor.agregarTarea("Hacer ejercicio"); //ver tareas sin romper encapsulamiento.
 
-console.log("Lista inicial:", gestor.listarTareas());
+console.log("Tareas después de agregar:", gestor.listarTareas());
+console.table(gestor.listarTareas());
+
 gestor.cambiarEstado(1);
-console.log("Después de cambiar estado:", gestor.listarTareas());
-gestor.eliminarTarea(2);
-console.log("Después de eliminar tarea 2:", gestor.listarTareas());
+console.log("Estado cambiado para la tarea 1");
+console.log("Tareas después de cambiar estado:", gestor.listarTareas());
+console.table(gestor.listarTareas());
+
+gestor.eliminarTarea(1);
+console.log("Tarea 1 eliminada");
+console.log("Tareas después de eliminar:", gestor.listarTareas());
+console.table(gestor.listarTareas());
