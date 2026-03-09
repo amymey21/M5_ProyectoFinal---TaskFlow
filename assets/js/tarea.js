@@ -1,5 +1,6 @@
-/* LECCIÓN 2
-Clase tarea */
+//LECCIÓN 3
+
+//Clase tarea
 class Tarea {
   constructor(id, descripcion) {
     this.id = id;
@@ -19,14 +20,14 @@ class Tarea {
 class GestorTareas {
   #tareas = []; // Array privado
 
-  // Crear tareas
+  // Método para crear tareas
   agregarTarea(descripcion) {
     const id = this.#tareas.length + 1; // Generar ID.
     const tarea = new Tarea(id, descripcion);
     this.#tareas.push(tarea);
   }
 
-  //Eliminar tareas por id
+  // Método para eliminar tareas por id
   eliminarTarea(id) {
     const index = this.#tareas.findIndex((tarea) => tarea.id === id); // const porque se calcula una sola vez.
     if (index === -1) {
@@ -36,7 +37,7 @@ class GestorTareas {
     this.#tareas.splice(index, 1);
   }
 
-  // Cambiar estado por id
+  // Método para cambiar estado por id
   cambiarEstado(id) {
     let tarea = this.#tareas.find((tarea) => tarea.id === id); //let porque puede ser undefined.
     if (!tarea) {
@@ -46,30 +47,108 @@ class GestorTareas {
     tarea.cambiarEstado();
   }
 
+  // Método para listar tareas
   listarTareas() {
     return this.#tareas;
-    // Listar tareas para verlas sin romper encapsulamiento
   }
 }
-// ------------------
-// TESTEO DEL CÓDIGO
-// ------------------
 
-// INTANCIA del gestor
-const gestor = new GestorTareas(); //const porque siempre será el mismo objeto.
+// ------------------------------------------
+// SELECTORES DE HTML & MANIPULACIÓN DEL DOM
+// ------------------------------------------
 
-gestor.agregarTarea("Estudiar JavaScript");
-gestor.agregarTarea("Hacer ejercicio"); //ver tareas sin romper encapsulamiento.
+const formulario = document.getElementById("formulario");
+const input = document.getElementById("tarea");
+const listaTareas = document.getElementById("lista-tareas");
+const gestor = new GestorTareas();
 
-console.log("Tareas después de agregar:", gestor.listarTareas());
-console.table(gestor.listarTareas());
+formulario.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const descripcion = input.value.trim();
+  if (descripcion) {
+    gestor.agregarTarea(descripcion);
+    mostrarTareas();
+    input.value = ""; // Limpiar el input
+  }
+});
 
-gestor.cambiarEstado(1);
-console.log("Estado cambiado para la tarea 1");
-console.log("Tareas después de cambiar estado:", gestor.listarTareas());
-console.table(gestor.listarTareas());
+function mostrarTareas() {
+  listaTareas.innerHTML = ""; // Limpiar la lista para que no se dupliquen.
+  gestor.listarTareas().forEach((tarea) => {
+    const li = document.createElement("li");
+    li.classList.add(
+      "list-group-item",
+      "d-flex",
+      "justify-content-between",
+      "align-items-center",
+    );
 
-gestor.eliminarTarea(1);
-console.log("Tarea 1 eliminada");
-console.log("Tareas después de eliminar:", gestor.listarTareas());
-console.table(gestor.listarTareas());
+    //span para descripción
+    const spanDescripcion = document.createElement("span");
+    spanDescripcion.textContent = tarea.descripcion;
+    spanDescripcion.classList.add("descripcion");
+
+    //Contenedor de tick y botones
+    const contAcciones = document.createElement("div");
+    contAcciones.classList.add("d-flex", "align-items-center");
+
+    // span para tick con espacio fijo
+    const spanTick = document.createElement("span");
+    spanTick.style.display = "inline-block";
+    spanTick.style.width = "20px";
+    // Tick si está completada
+    if (tarea.estado) {
+      spanTick.textContent = " ✔";
+      spanTick.style.color = "purple";
+    }
+
+    // Botón Hecho
+    const botonHecho = document.createElement("button");
+    botonHecho.textContent = "Listo";
+    botonHecho.classList.add("btn", "btn-success", "btn-sm", "ms-2");
+    botonHecho.addEventListener("click", () => {
+      gestor.cambiarEstado(tarea.id);
+      mostrarTareas();
+    });
+
+    // Botón Eliminar
+    const botonEliminar = document.createElement("button");
+    botonEliminar.textContent = "✕";
+    botonEliminar.classList.add("btn", "btn-danger", "btn-sm", "ms-2");
+    botonEliminar.addEventListener("click", () => {
+      gestor.eliminarTarea(tarea.id);
+      mostrarTareas();
+    });
+
+    // Efecto hover con mouseover y mouseout
+    li.addEventListener("mouseover", () => {
+      li.style.backgroundColor = "#c5dddc";
+    });
+    li.addEventListener("mouseout", () => {
+      li.style.backgroundColor = "";
+    });
+
+    // Ensamblar acciones
+    contAcciones.appendChild(spanTick);
+    contAcciones.appendChild(botonHecho);
+    contAcciones.appendChild(botonEliminar);
+
+    // Fila
+    li.appendChild(spanDescripcion);
+    li.appendChild(contAcciones);
+
+    listaTareas.appendChild(li);
+  });
+}
+mostrarTareas(); // Mostrar tareas al cargar la página
+
+const buscar = document.getElementById("buscar");
+buscar.addEventListener("keyup", () => {
+  const filtro = buscar.value.toLowerCase().trim();
+  const tareas = listaTareas.querySelectorAll("li");
+  tareas.forEach((li) => {
+    const spanDescripcion = li.querySelector(".descripcion");
+    const texto = spanDescripcion.textContent.toLowerCase();
+    li.style.display = texto.includes(filtro) ? "" : "none";
+  });
+});
