@@ -1,5 +1,6 @@
-//LECCIÓN 3
-
+/* ---------------------------------
+-----------LECCION 4----------------
+----------------------------------*/
 //Clase tarea
 class Tarea {
   constructor(id, descripcion) {
