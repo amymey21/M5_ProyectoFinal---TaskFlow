@@ -55,16 +55,58 @@ class GestorTareas {
 }
 
 // ------------------------------------------
-// SELECTORES DE HTML & MANIPULACIÓN DEL DOM
+// SELECTORES DE HTML, SELECTORES & MANIPULACIÓN DEL DOM
 // ------------------------------------------
 
+const gestor = new GestorTareas();
 const formulario = document.getElementById("formulario");
 const input = document.getElementById("tarea");
 const listaTareas = document.getElementById("lista-tareas");
-const gestor = new GestorTareas();
 const inputFecha = document.getElementById("fecha-limite");
 const buscar = document.getElementById("buscar");
+const clima = document.getElementById("clima");
+const API_KEY = "35c44cb58ab54eb5996151331260603";
 
+clima.addEventListener("click", () => {
+  const ciudad = prompt("¿Qué ciudad quieres consultar?");
+  if (ciudad) buscarClima(ciudad);
+});
+
+async function buscarClima(ciudad) {
+  const url = `http://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${ciudad}&lang=es`;
+  try {
+    let respuesta = await fetch(url);
+    if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
+    let datos = await respuesta.json();
+
+    document.getElementById("resultado-clima").innerHTML = `
+    <h3>${datos.location.name} (${datos.location.country})</h3>
+    <p>${datos.current.temp_c}°C</p>
+    <p>${datos.current.condition.text}</p>
+    <img src="${datos.current.condition.icon}" alt="icono clima">
+    `;
+    localStorage.setItem("ultimaCiudad", JSON.stringify(datos));
+  } catch (error) {
+    document.getElementById("resultado-clima").innerHTML =
+      `<p class="text-danger">No se pudo obtener el clima</p>`;
+    console.error("Error de consulta:", error);
+  }
+}
+
+window.addEventListener("load", () => {
+  const ultimo = localStorage.getItem("ultimoClima");
+  if (ultimo) {
+    const data = JSON.parse(ultimo);
+    document.getElementById("resultado-clima").innerHTML = `
+      <h5>${data.location.name} (${data.location.country})</h5>
+      <p>🌡️ ${data.current.temp_c}℃</p>
+      <p>☁️ ${data.current.condition.text}</p>
+      <img src="${data.current.condition.icon}" alt="icono clima">
+    `;
+  } else {
+    buscarClima("Santiago");
+  }
+});
 buscar.addEventListener("keyup", () => {
   const filtro = buscar.value.toLowerCase().trim();
   const tareas = listaTareas.querySelectorAll("li");

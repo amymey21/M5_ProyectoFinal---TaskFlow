@@ -18,6 +18,13 @@
       <h1 class="container text-centered">TaskFlow</h1>
     </header>
 
+    <!-- Area del clima - API -->
+    <div id="clima" class="card p-3 mt-4 bg-light" style="cursor: pointer">
+      <h4 class="card-title">Clima actual</h4>
+      <div id="resultado-clima"></div>
+    </div>
+    <div id="resultado-clima" class="mt-3"></div>
+
     <!-- Notificación flotante -->
     <div
       id="notificacion"
@@ -30,15 +37,6 @@
       <div class="row">
         <!-- Formulario -->
         <form id="formulario" class="col-md-6">
-          <div class="mb-3">
-            <input
-              type="text"
-              id="buscar"
-              placeholder="Buscar tarea"
-              class="form-control"
-            />
-          </div>
-
           <div class="mb-3">
             <input
               type="text"
@@ -62,11 +60,25 @@
           <button type="submit" class="btn btn-primary mb-3">Agregar</button>
         </form>
 
-        <!-- Lista de tareas  -->
-        <div class="card col-md-6">
-          <div class="card-body">
-            <h2 class="card-title">Tareas</h2>
-            <ul id="lista-tareas" class="list-group"></ul>
+        <div class="col-md-6">
+          <div class="">
+            <form id="buscador">
+              <div class="mb-3">
+                <input
+                  type="text"
+                  id="buscar"
+                  placeholder="Buscar tarea"
+                  class="form-control"
+                />
+              </div>
+            </form>
+            <!-- Lista de tareas  -->
+            <div class="card mb-3">
+              <div class="card-body bg-info-subtle">
+                <h2 class="card-title">Tareas</h2>
+                <ul id="lista-tareas" class="list-group"></ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
