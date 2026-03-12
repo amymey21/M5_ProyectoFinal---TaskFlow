@@ -3,14 +3,14 @@
 ----------------------------------*/
 //Clase tarea
 class Tarea {
-  constructor(id, descripcion) {
+  constructor(id, descripcion, fechaLimite = null) {
     this.id = id;
     this.descripcion = descripcion;
     this.estado = false; // false = pendiente, true = completada
     const fechaCreacion = new Date(); // const porque no se reasigna.
     this.fechaCreacion = fechaCreacion;
+    this.fechaLimite = fechaLimite; //propiedad opcional
   }
-
   // Método para cambiar el estado de la tarea
   cambiarEstado() {
     this.estado = !this.estado;
@@ -22,9 +22,9 @@ class GestorTareas {
   #tareas = []; // Array privado
 
   // Método para crear tareas
-  agregarTarea(descripcion) {
+  agregarTarea(descripcion, fechaLimite = null) {
     const id = this.#tareas.length + 1; // Generar ID.
-    const tarea = new Tarea(id, descripcion);
+    const tarea = new Tarea(id, descripcion, fechaLimite);
     this.#tareas.push(tarea);
   }
 
@@ -62,16 +62,62 @@ const formulario = document.getElementById("formulario");
 const input = document.getElementById("tarea");
 const listaTareas = document.getElementById("lista-tareas");
 const gestor = new GestorTareas();
+const inputFecha = document.getElementById("fecha-limite");
+const buscar = document.getElementById("buscar");
+
+buscar.addEventListener("keyup", () => {
+  const filtro = buscar.value.toLowerCase().trim();
+  const tareas = listaTareas.querySelectorAll("li");
+  tareas.forEach((li) => {
+    const spanDescripcion = li.querySelector(".descripcion");
+    const texto = spanDescripcion.textContent.toLowerCase();
+    li.style.display = texto.includes(filtro) ? "" : "none";
+  });
+});
 
 formulario.addEventListener("submit", (event) => {
   event.preventDefault();
   const descripcion = input.value.trim();
+  const fechaLimite = inputFecha.value ? new Date(inputFecha.value) : null;
+
   if (descripcion) {
-    gestor.agregarTarea(descripcion);
-    mostrarTareas();
-    input.value = ""; // Limpiar el input
+    setTimeout(() => {
+      gestor.agregarTarea(descripcion, fechaLimite);
+      mostrarTareas();
+      // Mostrar notificación
+      const notificacion = document.getElementById("notificacion");
+      notificacion.textContent = "¡Tarea agregada con éxito!";
+      notificacion.style.display = "block";
+      //Ocultar notificación después unos segundos
+      setTimeout(() => {
+        notificacion.style.display = "none";
+      }, 2500);
+    }, 1000);
+    input.value = ""; // Limpiar tarea
+    inputFecha.value = ""; // Limpiar fecha
   }
 });
+
+function iniciarContador(fechaLimite, spanContador) {
+  const intervalo = setInterval(() => {
+    const ahora = new Date();
+    const diferencia = fechaLimite - ahora;
+
+    if (diferencia <= 0) {
+      clearInterval(intervalo);
+      spanContador.textContent = "¿La terminaste, cierto?";
+    } else {
+      const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+      const horas = Math.floor(
+        (diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+      );
+      const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+      const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+      spanContador.textContent = `Quedan ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+    }
+  }, 1000);
+}
 
 function mostrarTareas() {
   listaTareas.innerHTML = ""; // Limpiar la lista para que no se dupliquen.
@@ -88,11 +134,41 @@ function mostrarTareas() {
     const spanDescripcion = document.createElement("span");
     spanDescripcion.textContent = tarea.descripcion;
     spanDescripcion.classList.add("descripcion");
+    li.appendChild(spanDescripcion);
 
-    //Contenedor de tick y botones
+    //Iniciar contador si hay fecha límite
+    if (tarea.fechaLimite) {
+      const spanContador = document.createElement("span");
+      spanContador.classList.add(
+        "badge",
+        "bg-info-subtle",
+        "text-dark",
+        "ms-3",
+      );
+      li.appendChild(spanContador);
+      iniciarContador(tarea.fechaLimite, spanContador);
+    }
+
+    // --------------------------------------------------------------------
+
+    // CONTENEDOR DE ACCIONES (tick, botones)
     const contAcciones = document.createElement("div");
     contAcciones.classList.add("d-flex", "align-items-center");
 
+    //---------------- BOTON HECHO
+    // Botón Hecho
+    const botonHecho = document.createElement("button");
+    botonHecho.textContent = "Listo";
+    botonHecho.classList.add("btn", "btn-success", "btn-sm", "ms-2");
+    botonHecho.addEventListener("click", () => {
+      gestor.cambiarEstado(tarea.id);
+      if (tarea.fechaLimite) {
+        tarea.fechaLimite = null; // Eliminar contador
+        mostrarTareas();
+      }
+    });
+
+    // --------------- TICK
     // span para tick con espacio fijo
     const spanTick = document.createElement("span");
     spanTick.style.display = "inline-block";
@@ -101,17 +177,13 @@ function mostrarTareas() {
     if (tarea.estado) {
       spanTick.textContent = " ✔";
       spanTick.style.color = "purple";
+      spanDescripcion.classList.add(
+        "text-decoration-line-through",
+        "text-muted",
+      );
     }
 
-    // Botón Hecho
-    const botonHecho = document.createElement("button");
-    botonHecho.textContent = "Listo";
-    botonHecho.classList.add("btn", "btn-success", "btn-sm", "ms-2");
-    botonHecho.addEventListener("click", () => {
-      gestor.cambiarEstado(tarea.id);
-      mostrarTareas();
-    });
-
+    // -------------- BOTON ELIMINAR
     // Botón Eliminar
     const botonEliminar = document.createElement("button");
     botonEliminar.textContent = "✕";
@@ -121,35 +193,26 @@ function mostrarTareas() {
       mostrarTareas();
     });
 
-    // Efecto hover con mouseover y mouseout
+    // Efecto hover con mouseover y mouseout en filas
     li.addEventListener("mouseover", () => {
-      li.style.backgroundColor = "#c5dddc";
+      li.style.backgroundColor = "#88d8d5";
     });
     li.addEventListener("mouseout", () => {
       li.style.backgroundColor = "";
     });
+
+    // ---------------------------------------------------------------------
 
     // Ensamblar acciones
     contAcciones.appendChild(spanTick);
     contAcciones.appendChild(botonHecho);
     contAcciones.appendChild(botonEliminar);
 
-    // Fila
-    li.appendChild(spanDescripcion);
+    //Agregar acciones al li
     li.appendChild(contAcciones);
 
+    //Agregar la fila a la lista
     listaTareas.appendChild(li);
   });
 }
 mostrarTareas(); // Mostrar tareas al cargar la página
-
-const buscar = document.getElementById("buscar");
-buscar.addEventListener("keyup", () => {
-  const filtro = buscar.value.toLowerCase().trim();
-  const tareas = listaTareas.querySelectorAll("li");
-  tareas.forEach((li) => {
-    const spanDescripcion = li.querySelector(".descripcion");
-    const texto = spanDescripcion.textContent.toLowerCase();
-    li.style.display = texto.includes(filtro) ? "" : "none";
-  });
-});
