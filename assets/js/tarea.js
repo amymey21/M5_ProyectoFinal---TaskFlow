@@ -1,5 +1,5 @@
 /* ---------------------------------
------------LECCION 4----------------
+-----------LECCION 5----------------
 ----------------------------------*/
 //Clase tarea
 class Tarea {
@@ -75,7 +75,7 @@ clima.addEventListener("click", () => {
 
 // Función para consultar clima usando async/await
 async function buscarClima(ciudad) {
-  const url = `http://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${ciudad}&lang=es`;
+  const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${ciudad}&lang=es`;
   try {
     let respuesta = await fetch(url);
     if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
