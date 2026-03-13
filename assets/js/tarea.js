@@ -214,8 +214,8 @@ function mostrarTareas() {
       gestor.cambiarEstado(tarea.id);
       if (tarea.fechaLimite) {
         tarea.fechaLimite = null; // Eliminar contador
-        mostrarTareas();
       }
+      mostrarTareas();
     });
 
     // --------------- TICK
