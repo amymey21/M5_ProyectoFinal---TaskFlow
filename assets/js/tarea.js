@@ -67,11 +67,13 @@ const buscar = document.getElementById("buscar");
 const clima = document.getElementById("clima");
 const API_KEY = "35c44cb58ab54eb5996151331260603";
 
+// Evento para consultar clima
 clima.addEventListener("click", () => {
   const ciudad = prompt("¿Qué ciudad quieres consultar?");
   if (ciudad) buscarClima(ciudad);
 });
 
+// Función para consultar clima usando async/await
 async function buscarClima(ciudad) {
   const url = `http://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${ciudad}&lang=es`;
   try {
@@ -79,22 +81,23 @@ async function buscarClima(ciudad) {
     if (!respuesta.ok) throw new Error(`Error: ${respuesta.status}`);
     let datos = await respuesta.json();
 
+    // Insertar datos en el DOM
     document.getElementById("resultado-clima").innerHTML = `
     <h3>${datos.location.name} (${datos.location.country})</h3>
     <p>${datos.current.temp_c}°C</p>
     <p>${datos.current.condition.text}</p>
     <img src="${datos.current.condition.icon}" alt="icono clima">
     `;
+    // Guardar última consulta en localStorage
     localStorage.setItem("ultimaCiudad", JSON.stringify(datos));
   } catch (error) {
     document.getElementById("resultado-clima").innerHTML =
       `<p class="text-danger">No se pudo obtener el clima</p>`;
-    console.error("Error de consulta:", error);
   }
 }
-
+// Al cargar página, mostrar última ciudad consultada o clima por defecto
 window.addEventListener("load", () => {
-  const ultimo = localStorage.getItem("ultimoClima");
+  const ultimo = localStorage.getItem("ultimaCiudad");
   if (ultimo) {
     const data = JSON.parse(ultimo);
     document.getElementById("resultado-clima").innerHTML = `
@@ -104,9 +107,11 @@ window.addEventListener("load", () => {
       <img src="${data.current.condition.icon}" alt="icono clima">
     `;
   } else {
-    buscarClima("Santiago");
+    buscarClima("Santiago"); //Clima por defecto.
   }
 });
+
+// Evento para filtrar tareas en tiempo real con una letra de la palabra
 buscar.addEventListener("keyup", () => {
   const filtro = buscar.value.toLowerCase().trim();
   const tareas = listaTareas.querySelectorAll("li");
@@ -117,11 +122,12 @@ buscar.addEventListener("keyup", () => {
   });
 });
 
+// Evento para agregar tareas con retraso y mostrar notificación
 formulario.addEventListener("submit", (event) => {
   event.preventDefault();
   const descripcion = input.value.trim();
   const fechaLimite = inputFecha.value ? new Date(inputFecha.value) : null;
-
+  // Retraso
   if (descripcion) {
     setTimeout(() => {
       gestor.agregarTarea(descripcion, fechaLimite);
@@ -140,11 +146,12 @@ formulario.addEventListener("submit", (event) => {
   }
 });
 
+// Función para iniciar contador regresivo
 function iniciarContador(fechaLimite, spanContador) {
   const intervalo = setInterval(() => {
     const ahora = new Date();
     const diferencia = fechaLimite - ahora;
-
+    // Fecha límite cumplida, detener contador y mostrar mensaje.
     if (diferencia <= 0) {
       clearInterval(intervalo);
       spanContador.textContent = "¿La terminaste, cierto?";
@@ -155,12 +162,13 @@ function iniciarContador(fechaLimite, spanContador) {
       );
       const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
       const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
-
+      // Texto del contador
       spanContador.textContent = `Quedan ${dias}d ${horas}h ${minutos}m ${segundos}s`;
     }
   }, 1000);
 }
 
+// Función para mostrar tareas en el DOM
 function mostrarTareas() {
   listaTareas.innerHTML = ""; // Limpiar la lista para que no se dupliquen.
   gestor.listarTareas().forEach((tarea) => {
@@ -172,13 +180,13 @@ function mostrarTareas() {
       "align-items-center",
     );
 
-    //span para descripción
+    // Span para descripción
     const spanDescripcion = document.createElement("span");
     spanDescripcion.textContent = tarea.descripcion;
     spanDescripcion.classList.add("descripcion");
     li.appendChild(spanDescripcion);
 
-    //Iniciar contador si hay fecha límite
+    // Iniciar contador si hay fecha límite
     if (tarea.fechaLimite) {
       const spanContador = document.createElement("span");
       spanContador.classList.add(
