@@ -107,7 +107,7 @@ window.addEventListener("load", () => {
       <img src="${data.current.condition.icon}" alt="icono clima">
     `;
   } else {
-    buscarClima("Santiago"); //Clima por defecto.
+    buscarClima("Santiago, Chile"); //Clima por defecto.
   }
 });
 
